@@ -27,7 +27,12 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
   }
 
   void sendChat() {
+    List uniqueId = [widget.currentUser.uid, widget.otherUser.uid];
+    uniqueId.sort();
+    final key = '${uniqueId[0]}_${uniqueId[1]}';
+
     MessageModel message = MessageModel(
+      key: key,
       sId: widget.currentUser.uid,
       rId: widget.otherUser.uid,
       text: _textController.text,

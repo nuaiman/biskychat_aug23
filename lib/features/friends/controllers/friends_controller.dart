@@ -8,6 +8,10 @@ class FriendsController extends StateNotifier<List<UserModel>> {
       : _friendsApi = friendsApi,
         super([]);
 
+  UserModel getUserById({required String uId}) {
+    return state.firstWhere((element) => element.uid == uId);
+  }
+
   Future<void> getAllFriends({required String currentUserId}) async {
     final documents =
         await _friendsApi.getAllFriends(currentUserId: currentUserId);

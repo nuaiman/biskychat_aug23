@@ -36,8 +36,6 @@ class BiskyChatApp extends ConsumerWidget {
             error: (error, stackTrace) => ErrorPage(error: error.toString()),
             loading: () => const LoadingPage(),
           ),
-
-      // const CreatePhoneSessionView(),
     );
   }
 }

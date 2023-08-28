@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class MessageModel {
-  final String id;
+  final String key;
   final String sId;
   final String rId;
   final String text;
@@ -10,7 +10,7 @@ class MessageModel {
   bool? read;
 
   MessageModel({
-    this.id = '',
+    required this.key,
     required this.sId,
     required this.rId,
     required this.text,
@@ -20,7 +20,7 @@ class MessageModel {
   });
 
   MessageModel copyWith({
-    String? id,
+    String? key,
     String? sId,
     String? rId,
     String? text,
@@ -29,7 +29,7 @@ class MessageModel {
     bool? read,
   }) {
     return MessageModel(
-      id: id ?? this.id,
+      key: key ?? this.key,
       sId: sId ?? this.sId,
       rId: rId ?? this.rId,
       text: text ?? this.text,
@@ -42,7 +42,7 @@ class MessageModel {
   Map<String, dynamic> toMap() {
     final result = <String, dynamic>{};
 
-    // result.addAll({'id': id});
+    result.addAll({'key': key});
     result.addAll({'sId': sId});
     result.addAll({'rId': rId});
     result.addAll({'text': text});
@@ -57,7 +57,7 @@ class MessageModel {
 
   factory MessageModel.fromMap(Map<String, dynamic> map) {
     return MessageModel(
-      id: map['\$id'] ?? '',
+      key: map['key'] ?? '',
       sId: map['sId'] ?? '',
       rId: map['rId'] ?? '',
       text: map['text'] ?? '',
@@ -74,7 +74,7 @@ class MessageModel {
 
   @override
   String toString() {
-    return 'MessageModel(id: $id, sId: $sId, rId: $rId, text: $text, type: $type, sendDate: $sendDate, read: $read)';
+    return 'MessageModel(key: $key, sId: $sId, rId: $rId, text: $text, type: $type, sendDate: $sendDate, read: $read)';
   }
 
   @override
@@ -82,7 +82,7 @@ class MessageModel {
     if (identical(this, other)) return true;
 
     return other is MessageModel &&
-        other.id == id &&
+        other.key == key &&
         other.sId == sId &&
         other.rId == rId &&
         other.text == text &&
@@ -93,7 +93,7 @@ class MessageModel {
 
   @override
   int get hashCode {
-    return id.hashCode ^
+    return key.hashCode ^
         sId.hashCode ^
         rId.hashCode ^
         text.hashCode ^
