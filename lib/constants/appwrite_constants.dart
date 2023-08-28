@@ -8,6 +8,7 @@ class AppwriteConstants {
   static const String serverKey = projectFirebaseFCMServerKey;
 
   static const String usersCollection = '64eb97dcb0f10817a836';
+  static const String messagesCollection = '64ed0b5c571ee557f54f';
 
   static const String imagesBucket = '64ebc40f80799b3b8b87';
 

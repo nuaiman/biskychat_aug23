@@ -1,4 +1,5 @@
 import 'package:biskychat_aug23/features/auth/controllers/auth_controller.dart';
+import 'package:biskychat_aug23/features/chats/views/messaging_view.dart';
 import 'package:biskychat_aug23/features/friends/controllers/friends_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,6 +23,14 @@ class FriendsView extends ConsumerWidget {
           itemBuilder: (context, index) {
             final friend = ref.watch(friendsControllerProvider)[index];
             return ListTile(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => MessagingView(
+                        currentUser: currentUser, otherUser: friend),
+                  ),
+                );
+              },
               leading: CircleAvatar(
                 backgroundImage: NetworkImage(friend.imageUrl),
               ),
