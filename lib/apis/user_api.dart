@@ -1,91 +1,81 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
-import 'package:biskychat_aug23/apis/storage_api.dart';
-import 'package:biskychat_aug23/constants/appwrite_constants.dart';
-import 'package:biskychat_aug23/core/appwrite_providers.dart';
-import 'package:biskychat_aug23/core/failure.dart';
-import 'package:biskychat_aug23/core/type_defs.dart';
-import 'package:biskychat_aug23/models/user_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 
+import '../constants/appwrite_constants.dart';
+import '../core/appwrite_providers.dart';
+import '../core/type_defs.dart';
+import 'storage_api.dart';
+
 abstract class IUserApi {
-  FutureEither<Document> createOrUpdateUserProfile(
-      {required UserModel userModel});
+  FutureEither<User> updateCurrentUserProfile({
+    required String userName,
+    required String imagePath,
+  });
 }
 // -----------------------------------------------------------------------------
 
 class UserApi implements IUserApi {
   final Account _account;
-  final StorageApi _storageApi;
   final Databases _databases;
+  final StorageApi _storageApi;
   UserApi({
     required Account account,
-    required StorageApi storageApi,
     required Databases databases,
+    required StorageApi storageApi,
   })  : _account = account,
-        _storageApi = storageApi,
-        _databases = databases;
+        _databases = databases,
+        _storageApi = storageApi;
 
   @override
-  FutureEither<Document> createOrUpdateUserProfile(
-      {required UserModel userModel}) async {
-    // update storage
+  FutureEither<User> updateCurrentUserProfile({
+    required String userName,
+    required String imagePath,
+  }) async {
+    final nameUpdatedUser = await _account.updateName(name: userName);
     final imageUrl =
-        await _storageApi.uploadImage(userModel.imageUrl, userModel.id);
-
-    // update account prefs
-    await _account.updateName(name: userModel.name);
-    await _account.updatePrefs(
+        await _storageApi.uploadImage(imagePath, nameUpdatedUser.$id);
+    final userDetails = await _account.updatePrefs(
       prefs: {
-        'name': userModel.name,
-        'phone': userModel.phone,
         'imageUrl': imageUrl,
-        // 'fcmToken': userModel.fcmToken,
       },
     );
-
     try {
-      final document = await _databases.updateDocument(
+      await _databases.updateDocument(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.usersCollection,
+        documentId: userDetails.$id,
+        data: {
+          'name': userName,
+          'imageUrl': imageUrl,
+        },
+      );
+    } on AppwriteException catch (e) {
+      if (e.code == 404) {
+        await _databases.createDocument(
           databaseId: AppwriteConstants.databaseId,
           collectionId: AppwriteConstants.usersCollection,
-          documentId: userModel.id,
+          documentId: userDetails.$id,
           data: {
-            'name': userModel.name,
-            'phone': userModel.phone,
+            'name': userName,
             'imageUrl': imageUrl,
-            // 'fcmToken': userModel.fcmToken,
-          });
-      return right(document);
-    } on AppwriteException catch (e, stackTrace) {
-      if (e.code == 404) {
-        final document = await _databases.createDocument(
-            databaseId: AppwriteConstants.databaseId,
-            collectionId: AppwriteConstants.usersCollection,
-            documentId: userModel.id,
-            data: {
-              'name': userModel.name,
-              'phone': userModel.phone,
-              'imageUrl': imageUrl,
-              // 'fcmToken': userModel.fcmToken,
-            });
-        return right(document);
+          },
+        );
       }
-      return left(Failure(e.toString(), stackTrace));
-    } catch (e, stackTrace) {
-      return left(Failure(e.toString(), stackTrace));
     }
+    return right(userDetails);
   }
 }
 // -----------------------------------------------------------------------------
 
 final userApiProvider = Provider((ref) {
   final account = ref.watch(appwriteAccountProvider);
-  final storageApi = ref.watch(storageApiProvider);
   final databases = ref.watch(appwriteDatabaseProvider);
+  final storageApi = ref.watch(storageApiProvider);
   return UserApi(
     account: account,
-    storageApi: storageApi,
     databases: databases,
+    storageApi: storageApi,
   );
 });

@@ -1,62 +1,95 @@
 import 'package:appwrite/models.dart';
-import 'package:biskychat_aug23/features/auth/views/phone_input_view.dart';
-import 'package:biskychat_aug23/main.dart';
-import '../../../apis/auth_api.dart';
-import '../../../core/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../views/phone_otp_view.dart';
+import '../../../apis/auth_api.dart';
+import '../../../apis/user_api.dart';
+import '../../../core/utils.dart';
+import '../../../models/user_model.dart';
+import '../../dashboard/views/dashboard_view.dart';
+import '../views/create_phone_session_view.dart';
+import '../views/update_user_profile_view.dart';
+import '../views/verify_phone_session.dart';
 
-class AuthController extends StateNotifier<bool> {
+class AuthController extends StateNotifier<UserModel> {
   final AuthApi _authApi;
-  AuthController({required AuthApi authApi})
+  final UserApi _userApi;
+  AuthController({required AuthApi authApi, required UserApi userApi})
       : _authApi = authApi,
-        super(false);
-
-  void createSession(
-      {required BuildContext context, required String phoneNumber}) async {
-    state = true;
-
-    final token = await _authApi.createSession(
-        userId: phoneNumber.substring(1), phone: phoneNumber);
-
-    token.fold(
-      (l) {
-        state = false;
-        showSnackbar(context, l.message);
-      },
-      (r) {
-        state = false;
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) => PhoneOtpView(
-            phoneNumber: phoneNumber,
-          ),
+        _userApi = userApi,
+        super(UserModel(
+          uid: '',
+          name: '',
+          imageUrl: '',
         ));
+
+  void createPhoneSession(
+      {required BuildContext context, required String phoneNumber}) async {
+    final result = await _authApi.createPhoneSession(
+      userId: phoneNumber.substring(1),
+      phone: phoneNumber,
+    );
+
+    result.fold(
+      (l) => showSnackbar(context, l.message),
+      (r) {
+        state = state.copyWith(uid: r.userId);
+        showSnackbar(context, 'Session creation was successful.');
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => VerifyPhoneSessionView(
+              userId: r.userId,
+              phoneNumber: '+${r.userId}',
+            ),
+          ),
+        );
       },
     );
   }
 
-  void verifySession({
-    required BuildContext context,
-    required String userId,
-    required String otp,
-  }) async {
-    state = true;
-    final result = await _authApi.verifySession(userId: userId, secret: otp);
-
-    await Future.delayed(const Duration(seconds: 2));
-
+  void verifyPhoneSession(
+      {required BuildContext context,
+      required String userId,
+      required String otp}) async {
+    final result = await _authApi.verifyPhoneSession(
+      userId: userId,
+      otp: otp,
+    );
     result.fold(
-      (l) {
-        state = false;
-        showSnackbar(context, l.message);
-      },
+      (l) => showSnackbar(context, l.message),
       (r) {
-        state = false;
+        showSnackbar(context, 'Session verification was successful.');
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const UpdateUserProfileView(),
+          ),
+        );
+      },
+    );
+  }
+
+  void updateCurrentUserProfile({
+    required BuildContext context,
+    required String userName,
+    required String imagePath,
+  }) async {
+    final user = await _userApi.updateCurrentUserProfile(
+      userName: userName,
+      imagePath: imagePath,
+    );
+
+    user.fold(
+      (l) => null,
+      (r) {
+        state = state.copyWith(
+          uid: r.$id,
+          name: r.name,
+          imageUrl: r.prefs.data['imageUrl'],
+        );
+
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (context) => const BiskyChatApp(),
+            builder: (context) => const DashboardView(),
           ),
           (route) => false,
         );
@@ -65,7 +98,14 @@ class AuthController extends StateNotifier<bool> {
   }
 
   Future<User?> getCurrentAccount() async {
-    User? user = await _authApi.getCurrentAccount();
+    final user = await _authApi.getCurrentAccount();
+    if (user != null) {
+      state = state.copyWith(
+        uid: user.$id,
+        name: user.name,
+        imageUrl: user.prefs.data['imageUrl'],
+      );
+    }
     return user;
   }
 
@@ -76,7 +116,7 @@ class AuthController extends StateNotifier<bool> {
       (r) => Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) => const PhoneInputView(),
+            builder: (context) => const CreatePhoneSessionView(),
           ),
           (route) => false),
     );
@@ -85,9 +125,13 @@ class AuthController extends StateNotifier<bool> {
 // -----------------------------------------------------------------------------
 
 final authControllerProvider =
-    StateNotifierProvider<AuthController, bool>((ref) {
+    StateNotifierProvider<AuthController, UserModel>((ref) {
   final authApi = ref.watch(authApiProvider);
-  return AuthController(authApi: authApi);
+  final userApi = ref.watch(userApiProvider);
+  return AuthController(
+    authApi: authApi,
+    userApi: userApi,
+  );
 });
 
 final getCurrentAccountProvider = FutureProvider((ref) async {

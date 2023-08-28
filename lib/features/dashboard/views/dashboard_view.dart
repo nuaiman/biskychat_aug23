@@ -1,6 +1,6 @@
-import 'package:biskychat_aug23/features/dashboard/views/chats_view.dart';
-import 'package:biskychat_aug23/features/dashboard/views/friends_view.dart';
-import 'package:biskychat_aug23/features/dashboard/views/settings_view.dart';
+import '../../chats/views/chats_view.dart';
+import '../../friends/views/friends_view.dart';
+import '../../settings/views/settings_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -36,18 +36,15 @@ class _DashboardViewState extends State<DashboardView> {
         items: [
           BottomNavigationBarItem(
             icon: Icon(
-              _currentIndex == 0 ? Icons.message : Icons.message_outlined,
-            ),
+                _currentIndex == 0 ? Icons.message : Icons.message_outlined),
+          ),
+          BottomNavigationBarItem(
+            icon:
+                Icon(_currentIndex == 1 ? Icons.people : Icons.people_outlined),
           ),
           BottomNavigationBarItem(
             icon: Icon(
-              _currentIndex == 1 ? Icons.person_2 : Icons.person_2_outlined,
-            ),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              _currentIndex == 2 ? Icons.settings : Icons.settings_outlined,
-            ),
+                _currentIndex == 2 ? Icons.settings : Icons.settings_outlined),
           ),
         ],
       ),

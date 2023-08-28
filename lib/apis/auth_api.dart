@@ -1,7 +1,5 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
-import 'package:biskychat_aug23/features/profile/controllers/profile_controller.dart';
-import 'package:biskychat_aug23/models/user_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -10,10 +8,10 @@ import '../core/failure.dart';
 import '../core/type_defs.dart';
 
 abstract class IAuthApi {
-  FutureEither<Token> createSession(
+  FutureEither<Token> createPhoneSession(
       {required String userId, required String phone});
-  FutureEither<Session> verifySession(
-      {required String userId, required String secret});
+  FutureEither<Session> verifyPhoneSession(
+      {required String userId, required String otp});
   Future<User?> getCurrentAccount();
   FutureEitherVoid logout();
 }
@@ -21,37 +19,37 @@ abstract class IAuthApi {
 
 class AuthApi implements IAuthApi {
   final Account _account;
-  final ProfileController _profileController;
-  AuthApi({
-    required Account account,
-    required ProfileController profileController,
-  })  : _account = account,
-        _profileController = profileController;
+  AuthApi({required Account account}) : _account = account;
 
   @override
-  FutureEither<Token> createSession(
+  FutureEither<Token> createPhoneSession(
       {required String userId, required String phone}) async {
     try {
-      final token =
+      Token token =
           await _account.createPhoneSession(userId: userId, phone: phone);
       return right(token);
     } on AppwriteException catch (e, stackTrace) {
-      return left(Failure(e.message ?? 'Something went wrong!', stackTrace));
+      return left(Failure(
+          e.message ?? 'Couldn\'t create session. Please try again later.',
+          stackTrace));
     } catch (e, stackTrace) {
       return left(Failure(e.toString(), stackTrace));
     }
   }
 
   @override
-  FutureEither<Session> verifySession(
-      {required String userId, required String secret}) async {
+  FutureEither<Session> verifyPhoneSession(
+      {required String userId, required String otp}) async {
     try {
-      Session session =
-          await _account.updatePhoneSession(userId: userId, secret: secret);
+      Session session = await _account.updatePhoneSession(
+        userId: userId,
+        secret: otp,
+      );
       return right(session);
     } on AppwriteException catch (e, stackTrace) {
-      return left(
-          Failure(e.message ?? 'Some unexpected error occured!', stackTrace));
+      return left(Failure(
+          e.message ?? 'Couldn\'t update session. Please try again later.',
+          stackTrace));
     } catch (e, stackTrace) {
       return left(Failure(e.toString(), stackTrace));
     }
@@ -60,20 +58,8 @@ class AuthApi implements IAuthApi {
   @override
   Future<User?> getCurrentAccount() async {
     try {
-      final user = await _account.get();
-      _profileController.setProfile(
-        userModel: UserModel(
-          id: user.$id,
-          name: user.name,
-          phone: user.phone,
-          imageUrl: user.prefs.data['imageUrl'],
-          // fcmToken: user.prefs.data['fcmToken'],
-        ),
-      );
-      return user;
+      return await _account.get();
     } on AppwriteException catch (_) {
-      return null;
-    } catch (_) {
       return null;
     }
   }
@@ -91,13 +77,9 @@ class AuthApi implements IAuthApi {
     }
   }
 }
-
 // -----------------------------------------------------------------------------
+
 final authApiProvider = Provider((ref) {
   final account = ref.watch(appwriteAccountProvider);
-  final profileController = ref.watch(profileControllerProvider.notifier);
-  return AuthApi(
-    account: account,
-    profileController: profileController,
-  );
+  return AuthApi(account: account);
 });

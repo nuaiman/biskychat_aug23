@@ -1,54 +1,42 @@
 import 'dart:convert';
 
 class UserModel {
-  final String id;
+  final String uid;
   final String name;
-  final String phone;
   final String imageUrl;
-  // final String? fcmToken;
   UserModel({
-    required this.id,
+    required this.uid,
     required this.name,
-    required this.phone,
     required this.imageUrl,
-    // this.fcmToken,
   });
 
   UserModel copyWith({
-    String? id,
+    String? uid,
     String? name,
-    String? phone,
     String? imageUrl,
-    String? fcmToken,
   }) {
     return UserModel(
-      id: id ?? this.id,
+      uid: uid ?? this.uid,
       name: name ?? this.name,
-      phone: phone ?? this.phone,
       imageUrl: imageUrl ?? this.imageUrl,
-      // fcmToken: fcmToken ?? this.fcmToken,
     );
   }
 
   Map<String, dynamic> toMap() {
     final result = <String, dynamic>{};
 
-    result.addAll({'id': id});
+    // result.addAll({'uid': uid});
     result.addAll({'name': name});
-    result.addAll({'phone': phone});
     result.addAll({'imageUrl': imageUrl});
-    // result.addAll({'fcmToken': fcmToken});
 
     return result;
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      id: map['\$id'] ?? '',
+      uid: map['\$id'] ?? '',
       name: map['name'] ?? '',
-      phone: map['phone'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
-      // fcmToken: map['fcmToken'] ?? '',
     );
   }
 
@@ -58,30 +46,18 @@ class UserModel {
       UserModel.fromMap(json.decode(source));
 
   @override
-  String toString() {
-    return 'UserModel(id: $id, name: $name, phone: $phone, imageUrl: $imageUrl)';
-    // return 'UserModel(id: $id, name: $name, phone: $phone, imageUrl: $imageUrl, fcmToken: $fcmToken)';
-  }
+  String toString() => 'UserModel(uid: $uid, name: $name, imageUrl: $imageUrl)';
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
     return other is UserModel &&
-            other.id == id &&
-            other.name == name &&
-            other.phone == phone &&
-            other.imageUrl == imageUrl
-        // &&
-        // other.fcmToken == fcmToken
-        ;
+        other.uid == uid &&
+        other.name == name &&
+        other.imageUrl == imageUrl;
   }
 
   @override
-  int get hashCode {
-    return id.hashCode ^ name.hashCode ^ phone.hashCode ^ imageUrl.hashCode
-        // ^
-        // fcmToken.hashCode
-        ;
-  }
+  int get hashCode => uid.hashCode ^ name.hashCode ^ imageUrl.hashCode;
 }
