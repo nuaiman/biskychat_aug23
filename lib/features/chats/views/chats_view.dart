@@ -40,6 +40,15 @@ class ChatsView extends ConsumerWidget {
                             message: MessageModel.fromMap(data.payload),
                           );
                     }
+                    if (data.events.contains(
+                        'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.messagesCollection}.documents.*.update')) {
+                      ref
+                          .read(chatsControllerProvider.notifier)
+                          .changeMessageSeen(
+                            data.payload['id'],
+                            data.payload,
+                          );
+                    }
                     return ListTile(
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(

@@ -3,6 +3,7 @@ import 'package:biskychat_aug23/models/message_model.dart';
 import 'package:biskychat_aug23/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../models/chat_model.dart';
 
@@ -35,6 +36,7 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
     // uniqueId.sort();
     // final key = '${uniqueId[0]}_${uniqueId[1]}';
     MessageModel message = MessageModel(
+      id: const Uuid().v4(),
       key: widget.mKey,
       sId: widget.currentUser.uid,
       rId: widget.otherUser.uid,
@@ -76,10 +78,26 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
                       reverse: true,
                       addAutomaticKeepAlives: true,
                       itemCount: chatModel.messages.length,
-                      itemBuilder: (context, index) => ListTile(
-                        leading: Text(chatModel.messages[index].text),
-                        subtitle: Text(chatModel.messages[index].sendDate),
-                      ),
+                      itemBuilder: (context, index) {
+                        final chat = chatModel.messages[index];
+                        if (chat.read == false) {
+                          ref
+                              .read(chatsControllerProvider.notifier)
+                              .updateMessageSeen(chat.id.toString());
+                        }
+                        return ListTile(
+                          leading: Text(
+                            chat.text,
+                          ),
+                          subtitle: Text(chat.sendDate),
+                          trailing: chat.read == false
+                              ? const Icon(Icons.done)
+                              : const Icon(
+                                  Icons.done_all,
+                                  color: Colors.green,
+                                ),
+                        );
+                      },
                     ),
             ),
             Container(

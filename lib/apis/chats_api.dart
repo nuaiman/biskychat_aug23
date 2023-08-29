@@ -1,9 +1,9 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'package:biskychat_aug23/constants/appwrite_constants.dart';
+import 'package:biskychat_aug23/core/type_defs.dart';
 import 'package:biskychat_aug23/models/message_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
 
 import '../core/appwrite_providers.dart';
 
@@ -13,6 +13,8 @@ abstract class IChatsApi {
   Future<List<Document>> getAllChats({required String currentUid});
 
   Stream<RealtimeMessage> getLatestMessage();
+
+  FutureVoid updateMessageSeen(String chatId);
 }
 // -----------------------------------------------------------------------------
 
@@ -30,7 +32,7 @@ class ChatsApi implements IChatsApi {
     await _databases.createDocument(
       databaseId: AppwriteConstants.databaseId,
       collectionId: AppwriteConstants.messagesCollection,
-      documentId: const Uuid().v4(),
+      documentId: message.id,
       data: message.toMap(),
     );
   }
@@ -74,6 +76,17 @@ class ChatsApi implements IChatsApi {
       'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.messagesCollection}.documents'
     ]).stream;
     return realtime;
+  }
+
+  @override
+  FutureVoid updateMessageSeen(String chatId) async {
+    await _databases.updateDocument(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.messagesCollection,
+        documentId: chatId,
+        data: {
+          'read': true,
+        });
   }
 }
 // -----------------------------------------------------------------------------

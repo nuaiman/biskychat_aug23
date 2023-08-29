@@ -60,7 +60,7 @@ class SettingsView extends ConsumerWidget {
                 );
               },
               child: const Text(
-                'Edit Prile',
+                'Edit Profile',
                 style: TextStyle(fontSize: 18),
               ),
             ),

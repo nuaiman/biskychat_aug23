@@ -79,7 +79,25 @@ class ChatsController extends StateNotifier<List<ChatModel>> {
         .insert(0, message);
     final newState = [...state];
     // state = newState;
-    Future.delayed(const Duration(milliseconds: 10), () {
+    Future.delayed(const Duration(milliseconds: 1), () {
+      state = newState;
+    });
+  }
+
+  void updateMessageSeen(String chatId) async {
+    await _chatsApi.updateMessageSeen(chatId);
+  }
+
+  void changeMessageSeen(String chatId, Map<String, dynamic> payload) {
+    state
+        .firstWhere((chat) => chat.key == payload['key'])
+        .messages
+        .firstWhere((message) => message.id == payload['id'])
+        .read = payload['read'];
+
+    final newState = [...state];
+
+    Future.delayed(const Duration(milliseconds: 1), () {
       state = newState;
     });
   }
