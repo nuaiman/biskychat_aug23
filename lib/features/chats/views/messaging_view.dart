@@ -4,13 +4,17 @@ import 'package:biskychat_aug23/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../models/chat_model.dart';
+
 class MessagingView extends ConsumerStatefulWidget {
   final UserModel currentUser;
   final UserModel otherUser;
+  final String mKey;
   const MessagingView({
     super.key,
     required this.currentUser,
     required this.otherUser,
+    required this.mKey,
   });
 
   @override
@@ -27,12 +31,11 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
   }
 
   void sendChat() {
-    List uniqueId = [widget.currentUser.uid, widget.otherUser.uid];
-    uniqueId.sort();
-    final key = '${uniqueId[0]}_${uniqueId[1]}';
-
+    // List uniqueId = [widget.currentUser.uid, widget.otherUser.uid];
+    // uniqueId.sort();
+    // final key = '${uniqueId[0]}_${uniqueId[1]}';
     MessageModel message = MessageModel(
-      key: key,
+      key: widget.mKey,
       sId: widget.currentUser.uid,
       rId: widget.otherUser.uid,
       text: _textController.text,
@@ -45,6 +48,12 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
 
   @override
   Widget build(BuildContext context) {
+    ChatModel? chatModel = ref
+        .watch(chatsControllerProvider.notifier)
+        .getAllMessagesForAmKey(mKey: widget.mKey);
+
+    ref.watch(chatsControllerProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.otherUser.name),
@@ -61,7 +70,17 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
         child: Column(
           children: [
             Flexible(
-              child: Container(),
+              child: chatModel == null
+                  ? Container()
+                  : ListView.builder(
+                      reverse: true,
+                      addAutomaticKeepAlives: true,
+                      itemCount: chatModel.messages.length,
+                      itemBuilder: (context, index) => ListTile(
+                        leading: Text(chatModel.messages[index].text),
+                        subtitle: Text(chatModel.messages[index].sendDate),
+                      ),
+                    ),
             ),
             Container(
               height: 55,

@@ -1,17 +1,34 @@
+import 'package:biskychat_aug23/features/auth/controllers/auth_controller.dart';
+import 'package:biskychat_aug23/features/chats/controllers/chats_controller.dart';
+import 'package:biskychat_aug23/features/friends/controllers/friends_controller.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../chats/views/chats_view.dart';
 import '../../friends/views/friends_view.dart';
 import '../../settings/views/settings_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class DashboardView extends StatefulWidget {
+class DashboardView extends ConsumerStatefulWidget {
   const DashboardView({super.key});
 
   @override
-  State<DashboardView> createState() => _DashboardViewState();
+  ConsumerState<DashboardView> createState() => _DashboardViewState();
 }
 
-class _DashboardViewState extends State<DashboardView> {
+class _DashboardViewState extends ConsumerState<DashboardView> {
+  @override
+  void initState() {
+    final currentUser = ref.read(authControllerProvider);
+    ref
+        .read(friendsControllerProvider.notifier)
+        .getAllFriends(currentUserId: currentUser.uid);
+    ref
+        .read(chatsControllerProvider.notifier)
+        .getAllChats(ref: ref, currentUser: currentUser);
+    super.initState();
+  }
+
   final _views = const [
     ChatsView(),
     FriendsView(),

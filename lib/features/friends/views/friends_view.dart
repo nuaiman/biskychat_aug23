@@ -25,10 +25,17 @@ class FriendsView extends ConsumerWidget {
             return ListTile(
               onTap: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => MessagingView(
-                        currentUser: currentUser, otherUser: friend),
-                  ),
+                  MaterialPageRoute(builder: (context) {
+                    List uniqueId = [currentUser.uid, friend.uid];
+                    uniqueId.sort();
+                    final mKey = '${uniqueId[0]}_${uniqueId[1]}';
+
+                    return MessagingView(
+                      currentUser: currentUser,
+                      otherUser: friend,
+                      mKey: mKey,
+                    );
+                  }),
                 );
               },
               leading: CircleAvatar(

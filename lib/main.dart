@@ -39,3 +39,12 @@ class BiskyChatApp extends ConsumerWidget {
     );
   }
 }
+
+
+  // if (data.events.contains(
+  //               'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.messagesCollection}.documents.*.create')) {
+            
+  //             ref
+  //                 .read(chatsControllerProvider.notifier)
+  //                 .addChatToState(message: MessageModel.fromMap(data.payload));
+  //           }

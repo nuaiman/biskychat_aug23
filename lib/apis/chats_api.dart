@@ -11,14 +11,19 @@ abstract class IChatsApi {
   void sendChat({required MessageModel message});
 
   Future<List<Document>> getAllChats({required String currentUid});
+
+  Stream<RealtimeMessage> getLatestMessage();
 }
 // -----------------------------------------------------------------------------
 
 class ChatsApi implements IChatsApi {
   final Databases _databases;
+  final Realtime _realtime;
   ChatsApi({
     required Databases databases,
-  }) : _databases = databases;
+    required Realtime realtime,
+  })  : _databases = databases,
+        _realtime = realtime;
 
   @override
   void sendChat({required MessageModel message}) async {
@@ -40,6 +45,7 @@ class ChatsApi implements IChatsApi {
           'rId',
           currentUid,
         ),
+        Query.orderDesc('\$createdAt'),
       ],
     );
     final list1 = document1.documents;
@@ -52,6 +58,7 @@ class ChatsApi implements IChatsApi {
           'sId',
           currentUid,
         ),
+        Query.orderDesc('\$createdAt'),
       ],
     );
     final list2 = document2.documents;
@@ -60,12 +67,22 @@ class ChatsApi implements IChatsApi {
 
     return list;
   }
+
+  @override
+  Stream<RealtimeMessage> getLatestMessage() {
+    final realtime = _realtime.subscribe([
+      'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.messagesCollection}.documents'
+    ]).stream;
+    return realtime;
+  }
 }
 // -----------------------------------------------------------------------------
 
 final chatsApiProvider = Provider((ref) {
   final databases = ref.watch(appwriteDatabaseProvider);
+  final realtime = ref.watch(appwriteRealtimeProvider);
   return ChatsApi(
     databases: databases,
+    realtime: realtime,
   );
 });

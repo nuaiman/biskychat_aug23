@@ -16,12 +16,19 @@ class ChatsController extends StateNotifier<List<ChatModel>> {
     _chatsApi.sendChat(message: message);
   }
 
+  ChatModel? getAllMessagesForAmKey({required String mKey}) {
+    if (state.isEmpty) {
+      return null;
+    }
+    ChatModel? chatModel = state.firstWhere((element) => element.key == mKey);
+    return chatModel;
+  }
+
   Future<void> getAllChats({
     required WidgetRef ref,
-    required String currentUid,
     required UserModel currentUser,
   }) async {
-    final list = await _chatsApi.getAllChats(currentUid: currentUid);
+    final list = await _chatsApi.getAllChats(currentUid: currentUser.uid);
     final mList = list.map((e) => MessageModel.fromMap(e.data)).toList();
 
     List<ChatModel> groupMessagesIntoChats(List<MessageModel> messageList) {
@@ -31,15 +38,13 @@ class ChatsController extends StateNotifier<List<ChatModel>> {
         if (!chatMap.containsKey(message.key)) {
           chatMap[message.key] = [];
         }
-
         chatMap[message.key]!.add(message);
       }
 
       List<ChatModel> chatList = chatMap.entries.map((entry) {
-        final id = entry.value.last.rId == currentUid
+        final id = entry.value.last.rId == currentUser.uid
             ? entry.value.last.sId
             : entry.value.last.rId;
-
         return ChatModel(
           key: entry.key,
           messages: entry.value,
@@ -48,13 +53,35 @@ class ChatsController extends StateNotifier<List<ChatModel>> {
               ref.read(friendsControllerProvider.notifier).getUserById(uId: id),
         );
       }).toList();
-
-      // print(chatList);
-
       return chatList;
     }
 
     state = groupMessagesIntoChats(mList);
+  }
+
+  void addChatToState(
+      {required WidgetRef ref,
+      required UserModel currentUser,
+      required MessageModel message}) {
+    if (state.isEmpty) {
+      getAllChats(ref: ref, currentUser: currentUser);
+      return;
+    }
+    if (state
+        .firstWhere((chat) => chat.key == message.key)
+        .messages
+        .contains(message)) {
+      return;
+    }
+    state
+        .firstWhere((chat) => chat.key == message.key)
+        .messages
+        .insert(0, message);
+    final newState = [...state];
+    // state = newState;
+    Future.delayed(const Duration(milliseconds: 10), () {
+      state = newState;
+    });
   }
 }
 // -----------------------------------------------------------------------------
@@ -63,4 +90,9 @@ final chatsControllerProvider =
     StateNotifierProvider<ChatsController, List<ChatModel>>((ref) {
   final chatsApi = ref.watch(chatsApiProvider);
   return ChatsController(chatsApi: chatsApi);
+});
+
+final getLatestMessageProvider = StreamProvider((ref) {
+  final chatApi = ref.watch(chatsApiProvider);
+  return chatApi.getLatestMessage();
 });
