@@ -92,7 +92,7 @@ final chatsControllerProvider =
   return ChatsController(chatsApi: chatsApi);
 });
 
-final getLatestMessageProvider = StreamProvider((ref) {
+final getLatestMessageProvider = StreamProvider.autoDispose((ref) {
   final chatApi = ref.watch(chatsApiProvider);
   return chatApi.getLatestMessage();
 });
