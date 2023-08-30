@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "456531492946",
+    "project_id": "biskychat-tut",
+    "storage_bucket": "biskychat-tut.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:456531492946:android:f2615cdf184ec0be4c1f8b",
+        "android_client_info": {
+          "package_name": "com.example.biskychat_aug23"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "456531492946-2slmmoh4e5ro24uanq6n52kt3rbda9gh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAT08kIu7MgHWuXOM1xnVN6Iecs0YpYsCs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "456531492946-2slmmoh4e5ro24uanq6n52kt3rbda9gh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "456531492946-6jq69sqanmssjhs0tfehvjhf01b8m81i.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterAppwriteChatAppJun23"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
