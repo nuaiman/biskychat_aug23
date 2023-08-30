@@ -45,3 +45,6 @@ app.*.map.json
 
 # Ignore these files in gitHub
 *secret_keys.dart
+*google-services.json
+*GoogleService-Info.plist
+
