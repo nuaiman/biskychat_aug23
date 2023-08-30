@@ -35,13 +35,16 @@ class UserApi implements IUserApi {
     required String imagePath,
   }) async {
     final nameUpdatedUser = await _account.updateName(name: userName);
+
     final imageUrl =
         await _storageApi.uploadImage(imagePath, nameUpdatedUser.$id);
+
     final userDetails = await _account.updatePrefs(
       prefs: {
         'imageUrl': imageUrl,
       },
     );
+
     try {
       await _databases.updateDocument(
         databaseId: AppwriteConstants.databaseId,

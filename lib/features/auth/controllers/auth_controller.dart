@@ -1,14 +1,15 @@
 import 'package:appwrite/models.dart';
+import 'package:biskychat_aug23/constants/appwrite_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../apis/auth_api.dart';
 import '../../../apis/user_api.dart';
 import '../../../core/utils.dart';
+import '../../../main.dart';
 import '../../../models/user_model.dart';
 import '../../dashboard/views/dashboard_view.dart';
 import '../views/create_phone_session_view.dart';
-import '../views/update_user_profile_view.dart';
 import '../views/verify_phone_session.dart';
 
 class AuthController extends StateNotifier<UserModel> {
@@ -47,10 +48,11 @@ class AuthController extends StateNotifier<UserModel> {
     );
   }
 
-  void verifyPhoneSession(
-      {required BuildContext context,
-      required String userId,
-      required String otp}) async {
+  void verifyPhoneSession({
+    required BuildContext context,
+    required String userId,
+    required String otp,
+  }) async {
     final result = await _authApi.verifyPhoneSession(
       userId: userId,
       otp: otp,
@@ -61,7 +63,7 @@ class AuthController extends StateNotifier<UserModel> {
         showSnackbar(context, 'Session verification was successful.');
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => const UpdateUserProfileView(),
+            builder: (context) => const BiskyChatApp(),
           ),
         );
       },
@@ -101,10 +103,10 @@ class AuthController extends StateNotifier<UserModel> {
     final user = await _authApi.getCurrentAccount();
     if (user != null) {
       state = state.copyWith(
-        uid: user.$id,
-        name: user.name,
-        imageUrl: user.prefs.data['imageUrl'],
-      );
+          uid: user.$id,
+          name: user.name,
+          // imageUrl: user.prefs.data['imageUrl'],
+          imageUrl: AppwriteConstants.imageUrl(user.$id));
     }
     return user;
   }
