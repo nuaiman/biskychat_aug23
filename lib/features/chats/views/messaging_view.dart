@@ -78,177 +78,179 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
         ],
       ),
       body: Form(
-        child: Column(
-          children: [
-            Flexible(
-              child: chatModel == null
-                  ? Container()
-                  : ListView.separated(
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 5),
-                      reverse: true,
-                      addAutomaticKeepAlives: true,
-                      itemCount: chatModel.messages.length,
-                      itemBuilder: (context, index) {
-                        final fullScreenWidth =
-                            MediaQuery.of(context).size.width;
-                        final message = chatModel.messages[index];
-                        final isSentByMe =
-                            message.sId == widget.currentUser.uid;
-                        if (message.read == false && !isSentByMe) {
-                          ref
-                              .read(chatsControllerProvider.notifier)
-                              .updateMessageSeen(message.id.toString());
-                        }
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            right: !isSentByMe ? fullScreenWidth * 0.4 : 0,
-                            left: isSentByMe ? fullScreenWidth * 0.4 : 0,
-                          ),
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            width: fullScreenWidth * 0.6,
-                            decoration: BoxDecoration(
-                              color: isSentByMe
-                                  ? Colors.green
-                                  : Colors.grey.shade100,
-                              borderRadius: BorderRadius.only(
-                                topLeft: const Radius.circular(10),
-                                topRight: const Radius.circular(10),
-                                bottomLeft:
-                                    Radius.circular(isSentByMe ? 10 : 0),
-                                bottomRight:
-                                    Radius.circular(!isSentByMe ? 10 : 0),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Flexible(
+                child: chatModel == null
+                    ? Container()
+                    : ListView.separated(
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 5),
+                        reverse: true,
+                        addAutomaticKeepAlives: true,
+                        itemCount: chatModel.messages.length,
+                        itemBuilder: (context, index) {
+                          final fullScreenWidth =
+                              MediaQuery.of(context).size.width;
+                          final message = chatModel.messages[index];
+                          final isSentByMe =
+                              message.sId == widget.currentUser.uid;
+                          if (message.read == false && !isSentByMe) {
+                            ref
+                                .read(chatsControllerProvider.notifier)
+                                .updateMessageSeen(message.id.toString());
+                          }
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              right: !isSentByMe ? fullScreenWidth * 0.4 : 0,
+                              left: isSentByMe ? fullScreenWidth * 0.4 : 0,
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              width: fullScreenWidth * 0.6,
+                              decoration: BoxDecoration(
+                                color: isSentByMe
+                                    ? Colors.green
+                                    : Colors.grey.shade100,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: const Radius.circular(10),
+                                  topRight: const Radius.circular(10),
+                                  bottomLeft:
+                                      Radius.circular(isSentByMe ? 10 : 0),
+                                  bottomRight:
+                                      Radius.circular(!isSentByMe ? 10 : 0),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: isSentByMe
+                                    ? CrossAxisAlignment.end
+                                    : CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    message.text,
+                                    textAlign: isSentByMe
+                                        ? TextAlign.right
+                                        : TextAlign.left,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: isSentByMe
+                                          ? Colors.white
+                                          : Colors.grey.shade800,
+                                    ),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      if (isSentByMe)
+                                        message.read == false
+                                            ? const Icon(
+                                                Icons.done,
+                                                size: 18,
+                                              )
+                                            : const Icon(
+                                                Icons.done_all,
+                                                color: Colors.white,
+                                                size: 18,
+                                              ),
+                                      Text(
+                                        DateFormat('d-MMM yy HH:mm').format(
+                                            DateTime.parse(message.sendDate)),
+                                        textAlign: isSentByMe
+                                            ? TextAlign.right
+                                            : TextAlign.left,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: isSentByMe
-                                  ? CrossAxisAlignment.end
-                                  : CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  message.text,
-                                  textAlign: isSentByMe
-                                      ? TextAlign.right
-                                      : TextAlign.left,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: isSentByMe
-                                        ? Colors.white
-                                        : Colors.grey.shade800,
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    if (isSentByMe)
-                                      message.read == false
-                                          ? const Icon(
-                                              Icons.done,
-                                              size: 18,
-                                            )
-                                          : const Icon(
-                                              Icons.done_all,
-                                              color: Colors.white,
-                                              size: 18,
-                                            ),
-                                    Text(
-                                      DateFormat().format(
-                                          DateTime.parse(message.sendDate)),
-                                      textAlign: isSentByMe
-                                          ? TextAlign.right
-                                          : TextAlign.left,
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-            ),
-            Container(
-              height: 55,
-              margin: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                children: [
-                  // Container(
-                  //   height: 55,
-                  //   margin: const EdgeInsets.symmetric(horizontal: 4),
-                  //   child: IconButton(
-                  //     onPressed: () {},
-                  //     icon: const Icon(
-                  //       Icons.camera_alt,
-                  //     ),
-                  //   ),
-                  // ),
-                  Flexible(
-                    child: ref.watch(getLatestMessageProvider).when(
-                          data: (data) {
-                            if (data.events.contains(
-                                'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.messagesCollection}.documents.*.create')) {
-                              ref
-                                  .read(chatsControllerProvider.notifier)
-                                  .addChatToState(
-                                    ref: ref,
-                                    currentUser: widget.currentUser,
-                                    message: MessageModel.fromMap(data.payload),
-                                  );
-                            }
-                            if (data.events.contains(
-                                'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.messagesCollection}.documents.*.update')) {
-                              ref
-                                  .read(chatsControllerProvider.notifier)
-                                  .changeMessageSeen(
-                                    data.payload['id'],
-                                    data.payload,
-                                  );
-                            }
+                          );
+                        },
+                      ),
+              ),
+              Container(
+                height: 55,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children: [
+                    // Container(
+                    //   height: 55,
+                    //   margin: const EdgeInsets.symmetric(horizontal: 4),
+                    //   child: IconButton(
+                    //     onPressed: () {},
+                    //     icon: const Icon(
+                    //       Icons.camera_alt,
+                    //     ),
+                    //   ),
+                    // ),
+                    Flexible(
+                      child: ref.watch(getLatestMessageProvider).when(
+                            data: (data) {
+                              if (data.events.contains(
+                                  'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.messagesCollection}.documents.*.create')) {
+                                ref
+                                    .read(chatsControllerProvider.notifier)
+                                    .addChatToState(
+                                      ref: ref,
+                                      currentUser: widget.currentUser,
+                                      message:
+                                          MessageModel.fromMap(data.payload),
+                                    );
+                              }
+                              if (data.events.contains(
+                                  'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.messagesCollection}.documents.*.update')) {
+                                ref
+                                    .read(chatsControllerProvider.notifier)
+                                    .changeMessageSeen(
+                                      data.payload['id'],
+                                      data.payload,
+                                    );
+                              }
 
-                            return TextField(
+                              return TextField(
+                                controller: _textController,
+                                decoration: const InputDecoration(
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.all(8),
+                                    border: OutlineInputBorder(),
+                                    hintText: 'Message'),
+                              );
+                            },
+                            error: (error, stackTrace) =>
+                                ErrorPage(error: error.toString()),
+                            loading: () => TextField(
                               controller: _textController,
                               decoration: const InputDecoration(
                                   isDense: true,
                                   contentPadding: EdgeInsets.all(8),
                                   border: OutlineInputBorder(),
                                   hintText: 'Message'),
-                            );
-                          },
-                          error: (error, stackTrace) =>
-                              ErrorPage(error: error.toString()),
-                          loading: () => TextField(
-                            controller: _textController,
-                            decoration: const InputDecoration(
-                                isDense: true,
-                                contentPadding: EdgeInsets.all(8),
-                                border: OutlineInputBorder(),
-                                hintText: 'Message'),
+                            ),
                           ),
-                        ),
-                  ),
-                  Container(
-                    height: 55,
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                    child: CircleAvatar(
+                    ),
+                    Container(
+                      height: 55,
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
                       child: RotatedBox(
                         quarterTurns: 3,
                         child: IconButton(
                           onPressed: sendChat,
                           icon: const Icon(
                             Icons.send,
-                            color: Colors.white,
+                            color: Colors.green,
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
