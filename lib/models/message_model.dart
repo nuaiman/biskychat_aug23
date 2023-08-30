@@ -6,7 +6,6 @@ class MessageModel {
   final String sId;
   final String rId;
   final String text;
-  final String type;
   final String sendDate;
   bool? read;
 
@@ -16,7 +15,6 @@ class MessageModel {
     required this.sId,
     required this.rId,
     required this.text,
-    required this.type,
     required this.sendDate,
     this.read = false,
   });
@@ -27,7 +25,6 @@ class MessageModel {
     String? sId,
     String? rId,
     String? text,
-    String? type,
     String? sendDate,
     bool? read,
   }) {
@@ -37,7 +34,6 @@ class MessageModel {
       sId: sId ?? this.sId,
       rId: rId ?? this.rId,
       text: text ?? this.text,
-      type: type ?? this.type,
       sendDate: sendDate ?? this.sendDate,
       read: read ?? this.read,
     );
@@ -51,7 +47,6 @@ class MessageModel {
     result.addAll({'sId': sId});
     result.addAll({'rId': rId});
     result.addAll({'text': text});
-    result.addAll({'type': type});
     result.addAll({'sendDate': sendDate});
     if (read != null) {
       result.addAll({'read': read});
@@ -67,7 +62,6 @@ class MessageModel {
       sId: map['sId'] ?? '',
       rId: map['rId'] ?? '',
       text: map['text'] ?? '',
-      type: map['type'] ?? '',
       sendDate: map['sendDate'] ?? '',
       read: map['read'],
     );
@@ -80,7 +74,7 @@ class MessageModel {
 
   @override
   String toString() {
-    return 'MessageModel(id: $id, key: $key, sId: $sId, rId: $rId, text: $text, type: $type, sendDate: $sendDate, read: $read)';
+    return 'MessageModel(id: $id, key: $key, sId: $sId, rId: $rId, text: $text, sendDate: $sendDate, read: $read)';
   }
 
   @override
@@ -93,7 +87,6 @@ class MessageModel {
         other.sId == sId &&
         other.rId == rId &&
         other.text == text &&
-        other.type == type &&
         other.sendDate == sendDate &&
         other.read == read;
   }
@@ -105,7 +98,6 @@ class MessageModel {
         sId.hashCode ^
         rId.hashCode ^
         text.hashCode ^
-        type.hashCode ^
         sendDate.hashCode ^
         read.hashCode;
   }

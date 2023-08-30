@@ -12,8 +12,22 @@ class ChatsController extends StateNotifier<List<ChatModel>> {
       : _chatsApi = chatsApi,
         super([]);
 
-  void sendChat({required MessageModel message}) async {
+  void sendChat(
+      {required MessageModel message,
+      required WidgetRef ref,
+      required UserModel currentUser}) async {
     _chatsApi.sendChat(message: message);
+    if (state.isEmpty) {
+      getAllChats(
+        ref: ref,
+        currentUser: currentUser,
+      );
+    }
+    final newState = [...state];
+    // state = newState;
+    Future.delayed(const Duration(milliseconds: 1), () {
+      state = newState;
+    });
   }
 
   ChatModel? getAllMessagesForAmKey({required String mKey}) {
@@ -110,7 +124,7 @@ final chatsControllerProvider =
   return ChatsController(chatsApi: chatsApi);
 });
 
-final getLatestMessageProvider = StreamProvider.autoDispose((ref) {
+final getLatestMessageProvider = StreamProvider((ref) {
   final chatApi = ref.watch(chatsApiProvider);
   return chatApi.getLatestMessage();
 });

@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../common/error_page.dart';
+import '../../../common/loading_page.dart';
+import '../../../constants/appwrite_constants.dart';
 import '../../../models/chat_model.dart';
 
 class MessagingView extends ConsumerStatefulWidget {
@@ -32,19 +35,17 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
   }
 
   void sendChat() {
-    // List uniqueId = [widget.currentUser.uid, widget.otherUser.uid];
-    // uniqueId.sort();
-    // final key = '${uniqueId[0]}_${uniqueId[1]}';
     MessageModel message = MessageModel(
       id: const Uuid().v4(),
       key: widget.mKey,
       sId: widget.currentUser.uid,
       rId: widget.otherUser.uid,
       text: _textController.text,
-      type: 'text',
       sendDate: DateTime.now().toIso8601String(),
     );
-    ref.read(chatsControllerProvider.notifier).sendChat(message: message);
+    ref
+        .read(chatsControllerProvider.notifier)
+        .sendChat(ref: ref, message: message, currentUser: widget.currentUser);
     _textController.clear();
   }
 
@@ -116,14 +117,48 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
                     ),
                   ),
                   Flexible(
-                    child: TextField(
-                      controller: _textController,
-                      decoration: const InputDecoration(
-                          isDense: true,
-                          contentPadding: EdgeInsets.all(8),
-                          border: OutlineInputBorder(),
-                          hintText: 'Message'),
-                    ),
+                    child: ref.watch(getLatestMessageProvider).when(
+                          data: (data) {
+                            if (data.events.contains(
+                                'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.messagesCollection}.documents.*.create')) {
+                              ref
+                                  .read(chatsControllerProvider.notifier)
+                                  .addChatToState(
+                                    ref: ref,
+                                    currentUser: widget.currentUser,
+                                    message: MessageModel.fromMap(data.payload),
+                                  );
+                            }
+                            if (data.events.contains(
+                                'databases.${AppwriteConstants.databaseId}.collections.${AppwriteConstants.messagesCollection}.documents.*.update')) {
+                              ref
+                                  .read(chatsControllerProvider.notifier)
+                                  .changeMessageSeen(
+                                    data.payload['id'],
+                                    data.payload,
+                                  );
+                            }
+
+                            return TextField(
+                              controller: _textController,
+                              decoration: const InputDecoration(
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.all(8),
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Message'),
+                            );
+                          },
+                          error: (error, stackTrace) =>
+                              ErrorPage(error: error.toString()),
+                          loading: () => TextField(
+                            controller: _textController,
+                            decoration: const InputDecoration(
+                                isDense: true,
+                                contentPadding: EdgeInsets.all(8),
+                                border: OutlineInputBorder(),
+                                hintText: 'Message'),
+                          ),
+                        ),
                   ),
                   Container(
                     height: 55,
