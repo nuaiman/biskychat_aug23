@@ -1,4 +1,5 @@
 import 'package:biskychat_aug23/features/chats/controllers/chats_controller.dart';
+import 'package:biskychat_aug23/features/fcm/controllers/fcm_controller.dart';
 import 'package:biskychat_aug23/models/message_model.dart';
 import 'package:biskychat_aug23/models/user_model.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +39,7 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
       id: const Uuid().v4(),
       key: widget.mKey,
       sId: widget.currentUser.uid,
+      sName: widget.otherUser.name,
       rId: widget.otherUser.uid,
       text: _textController.text,
       sendDate: DateTime.now().toIso8601String(),
@@ -45,6 +47,11 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
     ref
         .read(chatsControllerProvider.notifier)
         .sendChat(ref: ref, message: message, currentUser: widget.currentUser);
+    ref.read(fcmControllerProvider.notifier).sendFcm(
+          message,
+          widget.currentUser,
+          widget.otherUser,
+        );
     _textController.clear();
   }
 
@@ -80,7 +87,8 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
                       itemCount: chatModel.messages.length,
                       itemBuilder: (context, index) {
                         final chat = chatModel.messages[index];
-                        if (chat.read == false) {
+                        if (chat.read == false &&
+                            chat.sId != widget.currentUser.uid) {
                           ref
                               .read(chatsControllerProvider.notifier)
                               .updateMessageSeen(chat.id.toString());
@@ -90,12 +98,14 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
                             chat.text,
                           ),
                           subtitle: Text(chat.sendDate),
-                          trailing: chat.read == false
-                              ? const Icon(Icons.done)
-                              : const Icon(
-                                  Icons.done_all,
-                                  color: Colors.green,
-                                ),
+                          trailing: chat.sId == widget.currentUser.uid
+                              ? chat.read == false
+                                  ? const Icon(Icons.done)
+                                  : const Icon(
+                                      Icons.done_all,
+                                      color: Colors.green,
+                                    )
+                              : null,
                         );
                       },
                     ),

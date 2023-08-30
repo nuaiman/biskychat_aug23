@@ -4,21 +4,25 @@ class UserModel {
   final String uid;
   final String name;
   final String imageUrl;
+  final String? fcmToken;
   UserModel({
     required this.uid,
     required this.name,
     required this.imageUrl,
+    this.fcmToken,
   });
 
   UserModel copyWith({
     String? uid,
     String? name,
     String? imageUrl,
+    String? fcmToken,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
       name: name ?? this.name,
       imageUrl: imageUrl ?? this.imageUrl,
+      fcmToken: fcmToken ?? this.fcmToken,
     );
   }
 
@@ -28,6 +32,9 @@ class UserModel {
     // result.addAll({'uid': uid});
     result.addAll({'name': name});
     result.addAll({'imageUrl': imageUrl});
+    if (fcmToken != null) {
+      result.addAll({'fcmToken': fcmToken});
+    }
 
     return result;
   }
@@ -37,6 +44,7 @@ class UserModel {
       uid: map['\$id'] ?? '',
       name: map['name'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
+      fcmToken: map['fcmToken'],
     );
   }
 
@@ -46,7 +54,9 @@ class UserModel {
       UserModel.fromMap(json.decode(source));
 
   @override
-  String toString() => 'UserModel(uid: $uid, name: $name, imageUrl: $imageUrl)';
+  String toString() {
+    return 'UserModel(uid: $uid, name: $name, imageUrl: $imageUrl, fcmToken: $fcmToken)';
+  }
 
   @override
   bool operator ==(Object other) {
@@ -55,9 +65,12 @@ class UserModel {
     return other is UserModel &&
         other.uid == uid &&
         other.name == name &&
-        other.imageUrl == imageUrl;
+        other.imageUrl == imageUrl &&
+        other.fcmToken == fcmToken;
   }
 
   @override
-  int get hashCode => uid.hashCode ^ name.hashCode ^ imageUrl.hashCode;
+  int get hashCode {
+    return uid.hashCode ^ name.hashCode ^ imageUrl.hashCode ^ fcmToken.hashCode;
+  }
 }

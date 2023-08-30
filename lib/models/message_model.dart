@@ -4,6 +4,7 @@ class MessageModel {
   final String id;
   final String key;
   final String sId;
+  final String sName;
   final String rId;
   final String text;
   final String sendDate;
@@ -13,6 +14,7 @@ class MessageModel {
     required this.id,
     required this.key,
     required this.sId,
+    required this.sName,
     required this.rId,
     required this.text,
     required this.sendDate,
@@ -23,6 +25,7 @@ class MessageModel {
     String? id,
     String? key,
     String? sId,
+    String? sName,
     String? rId,
     String? text,
     String? sendDate,
@@ -32,6 +35,7 @@ class MessageModel {
       id: id ?? this.id,
       key: key ?? this.key,
       sId: sId ?? this.sId,
+      sName: sName ?? this.sName,
       rId: rId ?? this.rId,
       text: text ?? this.text,
       sendDate: sendDate ?? this.sendDate,
@@ -45,6 +49,7 @@ class MessageModel {
     result.addAll({'id': id});
     result.addAll({'key': key});
     result.addAll({'sId': sId});
+    result.addAll({'sName': sName});
     result.addAll({'rId': rId});
     result.addAll({'text': text});
     result.addAll({'sendDate': sendDate});
@@ -60,6 +65,7 @@ class MessageModel {
       id: map['id'] ?? '',
       key: map['key'] ?? '',
       sId: map['sId'] ?? '',
+      sName: map['sName'] ?? '',
       rId: map['rId'] ?? '',
       text: map['text'] ?? '',
       sendDate: map['sendDate'] ?? '',
@@ -74,7 +80,7 @@ class MessageModel {
 
   @override
   String toString() {
-    return 'MessageModel(id: $id, key: $key, sId: $sId, rId: $rId, text: $text, sendDate: $sendDate, read: $read)';
+    return 'MessageModel(id: $id, key: $key, sId: $sId , sName: $sName, rId: $rId, text: $text, sendDate: $sendDate, read: $read)';
   }
 
   @override
@@ -85,6 +91,7 @@ class MessageModel {
         other.id == id &&
         other.key == key &&
         other.sId == sId &&
+        other.sName == sName &&
         other.rId == rId &&
         other.text == text &&
         other.sendDate == sendDate &&
@@ -96,6 +103,7 @@ class MessageModel {
     return id.hashCode ^
         key.hashCode ^
         sId.hashCode ^
+        sName.hashCode ^
         rId.hashCode ^
         text.hashCode ^
         sendDate.hashCode ^

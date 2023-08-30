@@ -1,3 +1,7 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:biskychat_aug23/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,8 +11,32 @@ import 'features/auth/controllers/auth_controller.dart';
 import 'features/auth/views/create_phone_session_view.dart';
 import 'features/auth/views/update_user_profile_view.dart';
 import 'features/dashboard/views/dashboard_view.dart';
+import 'features/fcm/controllers/fcm_handler.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await AwesomeNotifications().initialize(
+    null, //'resource://drawable/res_app_icon',//
+    [
+      NotificationChannel(
+          channelKey: 'alerts',
+          channelName: 'Alerts',
+          channelDescription: 'Notification tests as alerts',
+          playSound: true,
+          onlyAlertOnce: true,
+          groupAlertBehavior: GroupAlertBehavior.Children,
+          importance: NotificationImportance.High,
+          defaultPrivacy: NotificationPrivacy.Private,
+          defaultColor: Colors.deepPurple,
+          ledColor: Colors.deepPurple)
+    ],
+    debug: false,
+  );
+
+  FirebaseMessaging.onBackgroundMessage(myBgMsgHandler);
   runApp(const ProviderScope(child: BiskyChatApp()));
 }
 

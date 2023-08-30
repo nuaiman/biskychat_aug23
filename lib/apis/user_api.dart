@@ -13,6 +13,7 @@ abstract class IUserApi {
     required String userName,
     required String imagePath,
   });
+  Future<void> updateUserFcmToken(String userId, String token);
 }
 // -----------------------------------------------------------------------------
 
@@ -65,6 +66,26 @@ class UserApi implements IUserApi {
       }
     }
     return right(userDetails);
+  }
+
+  @override
+  Future<void> updateUserFcmToken(String userId, String token) async {
+    try {
+      await _databases.updateDocument(
+          databaseId: AppwriteConstants.databaseId,
+          collectionId: AppwriteConstants.usersCollection,
+          documentId: userId,
+          data: {
+            'fcmToken': token,
+          });
+      await _account.updatePrefs(
+        prefs: {
+          'fcmToken': token,
+        },
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 }
 // -----------------------------------------------------------------------------

@@ -1,8 +1,10 @@
 import 'package:biskychat_aug23/features/auth/controllers/auth_controller.dart';
 import 'package:biskychat_aug23/features/chats/controllers/chats_controller.dart';
+import 'package:biskychat_aug23/features/fcm/controllers/fcm_controller.dart';
 import 'package:biskychat_aug23/features/friends/controllers/friends_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../models/user_model.dart';
 import '../../chats/views/chats_view.dart';
 import '../../friends/views/friends_view.dart';
 import '../../settings/views/settings_view.dart';
@@ -17,15 +19,19 @@ class DashboardView extends ConsumerStatefulWidget {
 }
 
 class _DashboardViewState extends ConsumerState<DashboardView> {
+  late UserModel currentUser;
   @override
   void initState() {
-    final currentUser = ref.read(authControllerProvider);
+    currentUser = ref.read(authControllerProvider);
     ref
         .read(friendsControllerProvider.notifier)
         .getAllFriends(currentUserId: currentUser.uid);
     ref
         .read(chatsControllerProvider.notifier)
         .getAllChats(ref: ref, currentUser: currentUser);
+    ref
+        .read(fcmControllerProvider.notifier)
+        .createFcmToken(ref, currentUser.uid);
     super.initState();
   }
 

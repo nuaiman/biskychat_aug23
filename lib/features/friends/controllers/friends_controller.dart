@@ -23,6 +23,7 @@ class FriendsController extends StateNotifier<List<UserModel>> {
               uid: e.$id,
               name: e.data['name'],
               imageUrl: e.data['imageUrl'],
+              fcmToken: e.data['fcmToken'],
             ),
           ),
         )
