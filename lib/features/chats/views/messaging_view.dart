@@ -4,6 +4,7 @@ import 'package:biskychat_aug23/models/message_model.dart';
 import 'package:biskychat_aug23/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../common/error_page.dart';
@@ -53,6 +54,7 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
           widget.otherUser,
         );
     _textController.clear();
+    FocusManager.instance.primaryFocus!.unfocus();
   }
 
   @override
@@ -81,31 +83,89 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
             Flexible(
               child: chatModel == null
                   ? Container()
-                  : ListView.builder(
+                  : ListView.separated(
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 5),
                       reverse: true,
                       addAutomaticKeepAlives: true,
                       itemCount: chatModel.messages.length,
                       itemBuilder: (context, index) {
-                        final chat = chatModel.messages[index];
-                        if (chat.read == false &&
-                            chat.sId != widget.currentUser.uid) {
+                        final fullScreenWidth =
+                            MediaQuery.of(context).size.width;
+                        final message = chatModel.messages[index];
+                        final isSentByMe =
+                            message.sId == widget.currentUser.uid;
+                        if (message.read == false && !isSentByMe) {
                           ref
                               .read(chatsControllerProvider.notifier)
-                              .updateMessageSeen(chat.id.toString());
+                              .updateMessageSeen(message.id.toString());
                         }
-                        return ListTile(
-                          leading: Text(
-                            chat.text,
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            right: !isSentByMe ? fullScreenWidth * 0.4 : 0,
+                            left: isSentByMe ? fullScreenWidth * 0.4 : 0,
                           ),
-                          subtitle: Text(chat.sendDate),
-                          trailing: chat.sId == widget.currentUser.uid
-                              ? chat.read == false
-                                  ? const Icon(Icons.done)
-                                  : const Icon(
-                                      Icons.done_all,
-                                      color: Colors.green,
-                                    )
-                              : null,
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            width: fullScreenWidth * 0.6,
+                            decoration: BoxDecoration(
+                              color: isSentByMe
+                                  ? Colors.green
+                                  : Colors.grey.shade100,
+                              borderRadius: BorderRadius.only(
+                                topLeft: const Radius.circular(10),
+                                topRight: const Radius.circular(10),
+                                bottomLeft:
+                                    Radius.circular(isSentByMe ? 10 : 0),
+                                bottomRight:
+                                    Radius.circular(!isSentByMe ? 10 : 0),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: isSentByMe
+                                  ? CrossAxisAlignment.end
+                                  : CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  message.text,
+                                  textAlign: isSentByMe
+                                      ? TextAlign.right
+                                      : TextAlign.left,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: isSentByMe
+                                        ? Colors.white
+                                        : Colors.grey.shade800,
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    if (isSentByMe)
+                                      message.read == false
+                                          ? const Icon(
+                                              Icons.done,
+                                              size: 18,
+                                            )
+                                          : const Icon(
+                                              Icons.done_all,
+                                              color: Colors.white,
+                                              size: 18,
+                                            ),
+                                    Text(
+                                      DateFormat().format(
+                                          DateTime.parse(message.sendDate)),
+                                      textAlign: isSentByMe
+                                          ? TextAlign.right
+                                          : TextAlign.left,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -115,16 +175,16 @@ class _MessagingViewState extends ConsumerState<MessagingView> {
               margin: const EdgeInsets.symmetric(horizontal: 8),
               child: Row(
                 children: [
-                  Container(
-                    height: 55,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    child: IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.camera_alt,
-                      ),
-                    ),
-                  ),
+                  // Container(
+                  //   height: 55,
+                  //   margin: const EdgeInsets.symmetric(horizontal: 4),
+                  //   child: IconButton(
+                  //     onPressed: () {},
+                  //     icon: const Icon(
+                  //       Icons.camera_alt,
+                  //     ),
+                  //   ),
+                  // ),
                   Flexible(
                     child: ref.watch(getLatestMessageProvider).when(
                           data: (data) {
