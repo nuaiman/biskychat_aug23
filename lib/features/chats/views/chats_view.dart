@@ -72,7 +72,15 @@ class ChatsView extends ConsumerWidget {
                         backgroundImage: NetworkImage(chat.otherUser.imageUrl),
                       ),
                       title: Text(chat.otherUser.name),
-                      subtitle: Text(chat.messages.first.text),
+                      subtitle: Text(
+                        chat.messages.first.text,
+                        style: TextStyle(
+                          fontWeight: chat.messages.first.read == false
+                              ? FontWeight.w900
+                              : FontWeight.w400,
+                          fontSize: chat.messages.first.read == false ? 16 : 22,
+                        ),
+                      ),
                     );
                   },
                 ),
