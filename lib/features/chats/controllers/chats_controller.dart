@@ -3,6 +3,7 @@ import 'package:biskychat_aug23/features/friends/controllers/friends_controller.
 import 'package:biskychat_aug23/models/message_model.dart';
 import 'package:biskychat_aug23/models/user_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fpdart/fpdart.dart';
 
 import '../../../models/chat_model.dart';
 
@@ -45,6 +46,12 @@ class ChatsController extends StateNotifier<List<ChatModel>> {
     final list = await _chatsApi.getAllChats(currentUid: currentUser.uid);
     final mList = list.map((e) => MessageModel.fromMap(e.data)).toList();
 
+    mList.sort(
+      (a, b) {
+        return a.sendDate.compareTo(b.sendDate);
+      },
+    );
+
     List<ChatModel> groupMessagesIntoChats(List<MessageModel> messageList) {
       Map<String, List<MessageModel>> chatMap = {};
 
@@ -70,7 +77,7 @@ class ChatsController extends StateNotifier<List<ChatModel>> {
       return chatList;
     }
 
-    state = groupMessagesIntoChats(mList);
+    state = groupMessagesIntoChats(mList.reversed.toList());
   }
 
   void addChatToState(
